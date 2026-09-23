@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Arch UI",
+  "short_name": "Arch UI",
+  "version": "2.4.0",
+  "description": "A premium, fully customizable new tab: unique clock designs, a themeable search bar, bookmarks, and shortcuts imported automatically.",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "storage",
+    "topSites",
+    "bookmarks",
+    "favicon",
+    "unlimitedStorage",
+    "identity.email"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

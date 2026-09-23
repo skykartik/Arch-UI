@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>New Tab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link id="base-fonts" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Background layers, in paint order -->
+  <div id="bg-color"></div>
+  <div id="bg-image"></div>
+  <video id="bg-video" muted loop autoplay playsinline></video>
+  <canvas id="bg-live"></canvas>
+  <canvas id="weather-fx"></canvas>
+  <div id="bg-scrim"></div>
+  <div id="bg-grain"></div>
+
+  <div id="app">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="apps-wrap">
+          <button class="google-apps" id="google-apps-toggle" title="Google apps">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <g fill="currentColor">
+                <circle cx="5" cy="5" r="1.9"/><circle cx="12" cy="5" r="1.9"/><circle cx="19" cy="5" r="1.9"/>
+                <circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/>
+                <circle cx="5" cy="19" r="1.9"/><circle cx="12" cy="19" r="1.9"/><circle cx="19" cy="19" r="1.9"/>
+              </g>
+            </svg>
+          </button>
+          <div class="apps-drawer" id="apps-drawer"></div>
+        </div>
+
+        <div class="apps-wrap" id="bookmarks-wrap">
+          <button class="google-apps" id="bookmarks-toggle" title="Bookmarks">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 3h12v18l-6-4.5L6 21z"/>
+            </svg>
+          </button>
+          <div class="apps-drawer bookmarks-drawer" id="bookmarks-drawer"></div>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="account-wrap">
+          <button class="account-chip" id="account-chip" title="Google account">
+            <span class="account-avatar" id="account-avatar">G</span>
+            <span class="account-label" id="account-label">Account</span>
+          </button>
+          <div class="account-dropdown" id="account-dropdown">
+            <div class="account-dropdown-row">
+              <span class="account-avatar lg" id="account-avatar-lg">G</span>
+              <div>
+                <div class="account-dropdown-email" id="account-dropdown-email">Detecting signed-in account…</div>
+                <div class="account-dropdown-hint">Extensions can only see the primary signed-in email — not your name, photo, or other logged-in accounts.</div>
+              </div>
+            </div>
+            <a class="account-dropdown-link" href="https://accounts.google.com/ServiceLogin" target="_blank" rel="noopener">
+              Manage or switch account
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <button class="icon-btn" id="settings-toggle" title="Customize">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="12" r="3.2"/>
+            <path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.5-2-3.4-2.3.9a7.7 7.7 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.7 7.7 0 0 0-1.7 1l-2.3-.9-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9c.5.4 1.1.8 1.7 1l.4 2.5h4l.4-2.5c.6-.2 1.2-.6 1.7-1l2.3.9 2-3.4-2-1.5Z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main stage -->
+    <main class="stage" id="stage">
+
+      <section class="clock-zone" id="clock-zone">
+        <div class="greeting" id="greeting"></div>
+        <div class="clock" id="clock"></div>
+        <div class="date" id="date-line"></div>
+      </section>
+
+      <section class="search-zone">
+        <form id="search-form" class="search-form" autocomplete="off">
+          <div class="engine-picker-wrap">
+            <button type="button" class="search-icon-btn" id="engine-icon" title="Change search engine"></button>
+          </div>
+          <input type="text" id="search-input" placeholder="Search the web" autocomplete="off" spellcheck="false" />
+          <button type="submit" class="search-go" aria-label="Search">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h13M13 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </form>
+      </section>
+
+      <section class="shortcuts-zone">
+        <div class="shortcuts-grid" id="shortcuts-grid"></div>
+      </section>
+
+    </main>
+
+    <div class="widgets-dock" id="widgets-dock">
+      <div class="widget weather-widget" id="weather-widget"></div>
+    </div>
+  </div>
+
+  <!-- Settings drawer -->
+  <aside class="drawer" id="settings-drawer">
+    <div class="drawer-inner">
+      <div class="drawer-head">
+        <h2>Customize</h2>
+        <button class="icon-btn" id="drawer-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="mode-switch" id="mode-switch">
+        <button class="mode-btn active" data-mode="themes">Themes</button>
+        <button class="mode-btn" data-mode="custom">Custom</button>
+      </div>
+
+      <!-- THEMES MODE: one-click curated looks, plus any theme codes you've added -->
+      <div class="mode-panel active" data-mode-panel="themes">
+        <div class="drawer-panels">
+          <p class="panel-label">Pick a theme</p>
+          <div class="theme-gallery" id="theme-gallery"></div>
+
+          <p class="panel-label">Load a theme pack</p>
+          <p class="hint-text">A theme pack is a folder (or a .zip of one) with a <code>theme.json</code> and its own wallpaper/sound files — anyone can make one (spec's in the README).</p>
+          <div class="pack-dropzone" id="pack-dropzone">
+            <span>Drop a theme pack folder or .zip here</span>
+            <div class="pack-dropzone-actions">
+              <button class="ghost-btn" id="pack-browse-btn">Choose a folder</button>
+              <button class="ghost-btn" id="pack-zip-btn">Choose a .zip</button>
+            </div>
+            <input type="file" id="pack-folder-input" webkitdirectory multiple hidden />
+            <input type="file" id="pack-zip-input" accept=".zip" hidden />
+          </div>
+          <p class="hint-text">Got a theme code instead? </p>
+          <button class="ghost-btn" id="add-theme-code-btn">Add a theme code</button>
+        </div>
+      </div>
+
+      <!-- CUSTOM MODE: the full dial-by-dial editor -->
+      <div class="mode-panel" data-mode-panel="custom">
+      <nav class="drawer-tabs" id="drawer-tabs">
+        <button class="drawer-tab active" data-tab="theme">Look</button>
+        <button class="drawer-tab" data-tab="clock">Clock</button>
+        <button class="drawer-tab" data-tab="search">Search</button>
+        <button class="drawer-tab" data-tab="shortcuts">Shortcuts</button>
+        <button class="drawer-tab" data-tab="sound">Sound</button>
+        <button class="drawer-tab" data-tab="layout">Layout</button>
+        <button class="drawer-tab" data-tab="widgets">Widgets</button>
+      </nav>
+
+      <div class="drawer-panels">
+
+        <!-- LOOK PANEL: theme, background, wallpaper, fonts -->
+        <div class="drawer-panel active" data-panel="theme">
+          <p class="panel-label">Palette</p>
+          <div class="swatch-row" id="theme-swatches"></div>
+
+          <p class="panel-label">Background</p>
+          <div class="seg-control" id="bg-type-control">
+            <button data-val="theme" class="seg active">Theme</button>
+            <button data-val="color" class="seg">Color</button>
+            <button data-val="gradient" class="seg">Gradient</button>
+            <button data-val="wallpaper" class="seg">Wallpaper</button>
+          </div>
+
+          <div class="option-block" id="bg-color-block" style="display:none">
+            <div class="swatch-row" id="solid-color-swatches"></div>
+            <div class="custom-color-row">
+              <input type="color" id="bg-color-input" value="#14161a" title="Pick a custom color" />
+              <input type="text" id="bg-color-hex" placeholder="#14161a" maxlength="7" />
+            </div>
+          </div>
+
+          <div class="option-block" id="bg-gradient-block" style="display:none">
+            <div class="swatch-row" id="gradient-swatches"></div>
+          </div>
+
+          <div class="option-block" id="bg-wallpaper-block" style="display:none">
+            <div class="seg-control seg-control-wrap" id="wallpaper-category-control">
+              <button data-val="live" class="seg active">Live</button>
+              <button data-val="photo" class="seg">Photo</button>
+              <button data-val="upload" class="seg">Upload</button>
+            </div>
+            <div class="wallpaper-grid" id="wallpaper-grid"></div>
+
+            <div class="option-block" id="wallpaper-upload-block" style="display:none">
+              <label class="upload-btn" for="bg-image-input">Choose a photo or video from your device</label>
+              <input type="file" id="bg-image-input" accept="image/*,video/*" hidden />
+              <p class="hint-text">Video wallpapers play muted and loop automatically.</p>
+              <div class="url-row">
+                <input type="text" id="bg-url-input" placeholder="...or paste an image or video link" />
+                <button type="button" class="ghost-btn" id="bg-url-use-btn">Use</button>
+              </div>
+            </div>
+
+            <div class="range-row">
+              <span>Dim</span>
+              <input type="range" id="scrim-range" min="0" max="80" value="30" />
+            </div>
+            <p class="hint-text" id="palette-hint">The interface colors update to match this wallpaper automatically.</p>
+          </div>
+
+          <p class="panel-label">Texture</p>
+          <label class="switch-row">
+            <span>Film grain</span>
+            <span class="toggle"><input type="checkbox" id="grain-toggle" /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+        </div>
+
+        <!-- CLOCK PANEL -->
+        <div class="drawer-panel" data-panel="clock">
+          <p class="panel-label">Style</p>
+          <div class="clock-style-grid" id="clock-style-grid"></div>
+
+          <p class="panel-label">Position</p>
+          <div class="seg-control" id="clock-vpos-control">
+            <button data-val="top" class="seg">Top</button>
+            <button data-val="center" class="seg active">Center</button>
+            <button data-val="bottom" class="seg">Bottom</button>
+          </div>
+          <div class="seg-control" id="clock-hpos-control">
+            <button data-val="left" class="seg">Left</button>
+            <button data-val="center" class="seg active">Center</button>
+            <button data-val="right" class="seg">Right</button>
+          </div>
+
+          <label class="switch-row">
+            <span>24-hour time</span>
+            <span class="toggle"><input type="checkbox" id="clock-24h-toggle" /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Show date</span>
+            <span class="toggle"><input type="checkbox" id="clock-date-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Show greeting</span>
+            <span class="toggle"><input type="checkbox" id="clock-greeting-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+
+          <div class="range-row"><span>Clock size</span><input type="range" id="clock-size-range" min="60" max="150" value="100" /></div>
+          <div class="range-row"><span>Greeting size</span><input type="range" id="greeting-size-range" min="60" max="180" value="100" /></div>
+          <div class="range-row"><span>Date size</span><input type="range" id="date-size-range" min="60" max="180" value="100" /></div>
+
+          <p class="panel-label">Text colors</p>
+          <div class="color-field-row">
+            <span>Greeting</span>
+            <input type="color" id="greeting-color-input" value="#9195a0" />
+            <input type="text" id="greeting-color-hex" placeholder="Auto" />
+            <button type="button" class="text-btn" id="greeting-color-reset">Auto</button>
+          </div>
+          <div class="color-field-row">
+            <span>Date</span>
+            <input type="color" id="date-color-input" value="#9195a0" />
+            <input type="text" id="date-color-hex" placeholder="Auto" />
+            <button type="button" class="text-btn" id="date-color-reset">Auto</button>
+          </div>
+        </div>
+
+        <!-- SEARCH PANEL -->
+        <div class="drawer-panel" data-panel="search">
+          <p class="panel-label">Bar style</p>
+          <div class="seg-control seg-control-wrap" id="search-style-control">
+            <button data-val="pill" class="seg active">Pill</button>
+            <button data-val="glass" class="seg">Glass</button>
+            <button data-val="underline" class="seg">Underline</button>
+            <button data-val="boxed" class="seg">Boxed</button>
+          </div>
+
+          <p class="panel-label">Search engine</p>
+          <div class="seg-control seg-control-wrap" id="engine-control">
+            <button data-val="google" class="seg active">Google</button>
+            <button data-val="bing" class="seg">Bing</button>
+            <button data-val="duckduckgo" class="seg">DuckDuckGo</button>
+            <button data-val="yahoo" class="seg">Yahoo</button>
+            <button data-val="brave" class="seg">Brave</button>
+          </div>
+
+          <div class="range-row">
+            <span>Width</span>
+            <input type="range" id="search-width-range" min="60" max="100" value="80" />
+          </div>
+
+          <p class="panel-label">Animation</p>
+          <div class="seg-control seg-control-wrap" id="search-animation-control">
+            <button data-val="glow" class="seg active">Glow</button>
+            <button data-val="expand" class="seg">Expand</button>
+            <button data-val="lift" class="seg">Lift</button>
+            <button data-val="underline-sweep" class="seg">Sweep</button>
+          </div>
+        </div>
+
+        <!-- SHORTCUTS PANEL -->
+        <div class="drawer-panel" data-panel="shortcuts">
+          <p class="panel-label">Layout</p>
+          <div class="seg-control" id="shortcut-size-control">
+            <button data-val="small" class="seg">Small</button>
+            <button data-val="medium" class="seg active">Medium</button>
+            <button data-val="large" class="seg">Large</button>
+          </div>
+
+          <p class="panel-label">Shape</p>
+          <div class="seg-control" id="shortcut-shape-control">
+            <button data-val="square" class="seg active">Square</button>
+            <button data-val="soft" class="seg">Soft</button>
+            <button data-val="circle" class="seg">Circle</button>
+            <button data-val="minimal" class="seg">Minimal</button>
+          </div>
+
+          <p class="panel-label">Hover animation</p>
+          <div class="seg-control seg-control-wrap" id="shortcut-animation-control">
+            <button data-val="lift" class="seg active">Lift</button>
+            <button data-val="bounce" class="seg">Bounce</button>
+            <button data-val="tilt" class="seg">Tilt</button>
+            <button data-val="glow" class="seg">Glow</button>
+            <button data-val="pop" class="seg">Pop</button>
+          </div>
+
+          <p class="panel-label">Opening effect</p>
+          <div class="seg-control seg-control-wrap" id="shortcut-open-effect-control">
+            <button data-val="zoom" class="seg active">Zoom</button>
+            <button data-val="ripple" class="seg">Ripple</button>
+            <button data-val="flip" class="seg">Flip</button>
+            <button data-val="launch" class="seg">Launch</button>
+            <button data-val="none" class="seg">None</button>
+          </div>
+
+          <label class="switch-row">
+            <span>Show labels</span>
+            <span class="toggle"><input type="checkbox" id="shortcut-labels-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+
+          <p class="panel-label">More from your browsing</p>
+          <p class="hint-text" id="topsites-hint">Add sites from your browsing history below, whether or not you imported them during setup.</p>
+          <div id="topsites-list" class="topsites-list"></div>
+
+          <p class="panel-label">All shortcuts</p>
+          <p class="hint-text">Right-click (or middle-click) a tile on the new tab to edit or delete it.</p>
+          <button class="text-btn" id="clear-shortcuts-btn">Remove all shortcuts</button>
+        </div>
+
+        <!-- SOUND PANEL -->
+        <div class="drawer-panel" data-panel="sound">
+          <p class="panel-label">Interface sounds</p>
+          <div class="sound-pack-grid" id="sound-pack-grid"></div>
+
+          <label class="switch-row">
+            <span>Play on clicks &amp; taps</span>
+            <span class="toggle"><input type="checkbox" id="sound-click-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Play while typing a search</span>
+            <span class="toggle"><input type="checkbox" id="sound-type-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+
+          <p class="hint-text">Every sound here is generated on the fly — nothing is downloaded, and volume follows your system output.</p>
+        </div>
+
+        <!-- LAYOUT PANEL — what's shown on the page -->
+        <div class="drawer-panel" data-panel="layout">
+          <p class="panel-label">On the page</p>
+          <label class="switch-row">
+            <span>Clock</span>
+            <span class="toggle"><input type="checkbox" id="show-clock-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Search bar</span>
+            <span class="toggle"><input type="checkbox" id="show-searchbar-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Shortcuts</span>
+            <span class="toggle"><input type="checkbox" id="show-shortcuts-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+
+          <p class="panel-label">Top bar</p>
+          <label class="switch-row">
+            <span>Google apps menu</span>
+            <span class="toggle"><input type="checkbox" id="show-googleapps-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Bookmarks menu</span>
+            <span class="toggle"><input type="checkbox" id="show-bookmarks-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <label class="switch-row">
+            <span>Account button</span>
+            <span class="toggle"><input type="checkbox" id="show-account-toggle" checked /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+
+          <p class="panel-label">Share your look</p>
+          <p class="hint-text">Copy a code with your current theme, clock, search, and layout choices — paste it into the Themes tab on another device, or send it to someone else. Shortcuts and bookmarks aren't included.</p>
+          <div class="share-row">
+            <button class="ghost-btn" id="export-theme-btn">Copy theme code</button>
+          </div>
+        </div>
+
+        <!-- WIDGETS PANEL -->
+        <div class="drawer-panel" data-panel="widgets">
+          <p class="panel-label">Weather</p>
+          <label class="switch-row">
+            <span>Show weather</span>
+            <span class="toggle"><input type="checkbox" id="show-weather-toggle" /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <div class="seg-control seg-control-wrap" id="weather-style-control">
+            <button data-val="card" class="seg active">Card</button>
+            <button data-val="compact" class="seg">Compact</button>
+            <button data-val="hero" class="seg">Hero</button>
+          </div>
+          <div class="seg-control" id="weather-unit-control">
+            <button data-val="auto" class="seg active">Auto °</button>
+            <button data-val="celsius" class="seg">°C</button>
+            <button data-val="fahrenheit" class="seg">°F</button>
+          </div>
+
+          <label class="field-label">Location</label>
+          <input type="text" id="weather-location-input" placeholder="Search for a city..." />
+          <div class="engine-dropdown-inline" id="weather-location-results"></div>
+          <p class="hint-text">You choose the location — nothing is detected automatically. Search a city, pick it from the list, and it's saved.</p>
+
+          <label class="switch-row">
+            <span>Weather effects on screen</span>
+            <span class="toggle"><input type="checkbox" id="show-weather-fx-toggle" /><span class="toggle-track"><span class="toggle-knob"></span></span></span>
+          </label>
+          <p class="hint-text">A subtle rain, snow, fog, or storm overlay matching current conditions (plus a light haze on poor air-quality days), drawn behind everything on the page — it never blocks clicks.</p>
+        </div>
+
+      </div>
+      </div>
+
+      <div class="drawer-foot">
+        <button class="text-btn" id="reset-all-btn">Reset everything to default</button>
+      </div>
+    </div>
+  </aside>
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <div class="engine-dropdown-backdrop" id="engine-dropdown-backdrop"></div>
+
+  <!-- import theme code modal -->
+  <div class="modal-backdrop" id="import-modal-backdrop">
+    <div class="modal" id="import-modal">
+      <h3>Paste a theme code</h3>
+      <textarea id="import-theme-textarea" rows="6" placeholder="Paste the code someone shared with you..."></textarea>
+      <div class="modal-actions">
+        <div></div>
+        <div class="modal-actions-right">
+          <button type="button" class="ghost-btn" id="import-cancel-btn">Cancel</button>
+          <button type="button" class="primary-btn" id="import-apply-btn">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="engine-dropdown" id="engine-dropdown"></div>
+
+  <!-- First-run setup wizard -->
+  <div class="setup-overlay hidden" id="setup-overlay">
+    <div class="setup-card" id="setup-card">
+
+      <div class="setup-step active" data-step="welcome">
+        <div class="setup-emblem">
+          <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="24" cy="24" r="17"/>
+            <path d="M24 15v9l6 4"/>
+          </svg>
+        </div>
+        <h1>Welcome to Arch UI</h1>
+        <p class="setup-copy">Let's set up your new tab — it only takes a moment, and you can change any of it later.</p>
+        <div class="setup-actions">
+          <button class="text-btn" id="setup-skip-btn">Skip setup</button>
+          <button class="primary-btn" id="setup-start-btn">Get started</button>
+        </div>
+      </div>
+
+      <div class="setup-step" data-step="look">
+        <h2>Pick a look</h2>
+        <p class="setup-copy">You can layer wallpapers and fonts on top of this later.</p>
+        <div class="swatch-row" id="setup-theme-swatches"></div>
+      </div>
+
+      <div class="setup-step" data-step="clock">
+        <h2>Choose a clock</h2>
+        <p class="setup-copy">Every style updates live as you tap through them.</p>
+        <div class="clock-style-grid" id="setup-clock-style-grid"></div>
+      </div>
+
+      <div class="setup-step" data-step="search">
+        <h2>Default search engine</h2>
+        <p class="setup-copy">Used by the search bar and its shortcut icon.</p>
+        <div class="setup-engine-list" id="setup-engine-list"></div>
+      </div>
+
+      <div class="setup-step" data-step="shortcuts">
+        <h2>Add your shortcuts?</h2>
+        <p class="setup-copy">We can pull in your most-visited sites automatically, or you can start with a clean grid and add your own.</p>
+        <div class="setup-choice-row">
+          <button class="setup-choice-card" id="setup-shortcuts-yes">
+            <strong>Yes, add them</strong>
+            <span>Import my most-visited sites</span>
+          </button>
+          <button class="setup-choice-card" id="setup-shortcuts-no">
+            <strong>Not yet</strong>
+            <span>I'll add my own later</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-step" data-step="bookmarks">
+        <h2>Show your bookmarks?</h2>
+        <p class="setup-copy">A bookmarks menu can sit in the top bar next to your Google apps — you can toggle it off anytime in Layout settings.</p>
+        <div class="setup-choice-row">
+          <button class="setup-choice-card" id="setup-bookmarks-yes">
+            <strong>Yes, show it</strong>
+            <span>Add the bookmarks menu</span>
+          </button>
+          <button class="setup-choice-card" id="setup-bookmarks-no">
+            <strong>No thanks</strong>
+            <span>Keep the top bar minimal</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-step" data-step="done">
+        <div class="setup-emblem check">
+          <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="24" cy="24" r="17"/>
+            <path d="M16 24l6 6 11-13"/>
+          </svg>
+        </div>
+        <h1>You're all set</h1>
+        <p class="setup-copy">Open the gear icon any time to fine-tune wallpapers, fonts, shortcuts, and sound.</p>
+        <div class="setup-actions">
+          <button class="primary-btn" id="setup-finish-btn">Start browsing</button>
+        </div>
+      </div>
+
+      <div class="setup-footer" id="setup-footer">
+        <div class="setup-dots" id="setup-dots"></div>
+        <div class="setup-nav">
+          <button class="ghost-btn" id="setup-back-btn" style="display:none">Back</button>
+          <button class="primary-btn" id="setup-next-btn">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / edit shortcut modal -->
+  <div class="modal-backdrop" id="shortcut-modal-backdrop">
+    <div class="modal" id="shortcut-modal">
+      <h3 id="shortcut-modal-title">Add shortcut</h3>
+      <label class="field-label">Name</label>
+      <input type="text" id="shortcut-name-input" placeholder="e.g. Figma" />
+      <label class="field-label">URL</label>
+      <input type="text" id="shortcut-url-input" placeholder="e.g. figma.com" />
+      <div class="modal-actions">
+        <button type="button" class="text-btn" id="shortcut-delete-btn" style="display:none">Delete</button>
+        <div class="modal-actions-right">
+          <button type="button" class="ghost-btn" id="shortcut-cancel-btn">Cancel</button>
+          <button type="button" class="primary-btn" id="shortcut-save-btn">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/state.js"></script>
+  <script src="js/clocks.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/wallpapers.js"></script>
+  <script src="js/weatherfx.js"></script>
+  <script src="js/zip.js"></script>
+  <script src="js/newtab.js"></script>
+</body>
+</html>
